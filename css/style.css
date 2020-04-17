@@ -1,0 +1,42 @@
+h1 {
+	background-color: #f96332;
+	color: #FFFFFF;
+	text-align: center;
+	font-size: 10rem;
+}
+
+.container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.space {
+	margin: 10rem;
+}
+
+.my-btn {
+	font-size: 5rem;
+}
+
+.btn-container {
+	display: flex;
+	justify-content: center;
+}
+
+.card {
+	margin: 2rem;
+	height: 25rem;
+	font-size: 1.5rem;
+}
+
+.card-title {
+	background-color: #f96332;
+	color: #FFFFFF;
+	margin-top: 0;
+	font-size: 3rem;
+}
+
+.btn-inside {
+	margin-top: 10rem;
+}
