@@ -3,6 +3,7 @@ h1 {
 	color: #FFFFFF;
 	text-align: center;
 	font-size: 10rem;
+	margin-bottom: 10rem;
 }
 
 .container {
@@ -12,11 +13,18 @@ h1 {
 }
 
 .space {
-	margin: 10rem;
+	margin: 5rem;
 }
 
 .my-btn {
+	font-size: 3rem;
+	width: 30rem;
+	margin: 2rem;
+}
+
+.my-btn-lg {
 	font-size: 5rem;
+	width: 40rem;
 }
 
 .btn-container {
@@ -37,6 +45,39 @@ h1 {
 	font-size: 3rem;
 }
 
-.btn-inside {
-	margin-top: 10rem;
+.card-body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.my-form-control {
+	width: 20rem;
+	height: 3rem;
+}
+
+.radio-label {
+	width: 7rem;
+}
+
+input[type=radio] {
+	display: none;
+}
+
+input[type=radio] + label {
+	display:inline-block;
+	cursor: pointer;
+	border: 0.1rem solid;
+	margin: -0.2rem;
+	background-color: #f96332;
+	color: #ffffff;
+}
+
+input[type=radio]:checked + label {
+	background-color: #ffffff;
+	color: #f96332;
+}
+
+h5 {
+	color: #f96332;
 }
