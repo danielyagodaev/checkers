@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet"/>
+	<link href="../css/bootstrap.min.css" rel="stylesheet"/>
+	<link href="../css/now-ui-kit.css?v=1.3.0" rel="stylesheet"/>
+	<link href="../css/style.css" rel="stylesheet"/>
+</head>
+
+<body>
+	<h1>Checkers</h1>
+
+	<form action="">
+		<div class="big-container">
+			<div class="card text-center">
+				<h4 class="card-title">Player 1</h4>
+				<div class="card-body">
+					<div class="form-group">
+						<h5>Name</h5>
+						<input type="text" name="player_1_name" id="player_1_name" class="form-control my-form-control" disabled>
+					</div>
+				</div>
+			</div>
+			<div class="radios-container">
+				<div class="radio-container">
+					<h5>Player 1 Color</h5>
+					<input type="radio" id="player_1_color_red" name="player_1_color" value="red" checked="true">
+			        <label for="player_1_color_red" class="radio-label">Red</label>
+			        <input type="radio" id="player_1_color_white" name="player_1_color" value="white">
+			        <label for="player_1_color_white" class="radio-label">White</label>
+		    	</div>
+		        <div class="radio-container">
+					<h5>Starting Color</h5>
+					<input type="radio" id="starting_color_red" name="starting_color" value="red" checked="true">
+			        <label for="starting_color_red" class="radio-label">Red</label>
+			        <input type="radio" id="starting_color_white" name="starting_color" value="white">
+			        <label for="starting_color_white" class="radio-label">White</label>
+		    	</div>
+		        <div class="radio-container">
+					<h5>Highlight Jumps</h5>
+					<input type="radio" id="highlight_jumps_yes" name="highlight_jumps" value="yes" checked="true">
+			        <label for="highlight_jumps_yes" class="radio-label">Yes</label>
+			        <input type="radio" id="highlight_jumps_no" name="highlight_jumps" value="no">
+			        <label for="highlight_jumps_no" class="radio-label">No</label>
+		    	</div>	       
+		        <div class="radio-container">
+					<h5>Sounds</h5>
+					<input type="radio" id="sounds_on" name="sounds" value="on" checked="true">
+			        <label for="sounds_on" class="radio-label">On</label>
+			        <input type="radio" id="sounds_off" name="sounds" value="off">
+			        <label for="sounds_off" class="radio-label">Off</label>
+		    	</div>	     
+    		</div>
+			<div class="card text-center">
+				<h4 class="card-title">Player 2</h4>
+				<div class="card-body">
+					<div class="form-group">
+						<h5>Name</h5>
+						<input type="text" name="player_2_name" id="player_2_name" class="form-control my-form-control" disabled>
+						<h5>Level</h5>
+						<input type="text" name="player_2_level" id="player_2_level" class="form-control my-form-control" disabled>
+					</div>
+				</div>
+			</div>
+    	</div>
+    	<div class="space"></div>
+    	<div class="container">
+	    	<div class="btn-container">
+	    		<button type="button" class="btn btn-primary btn-round btn-lg my-btn" onclick="history.back()">Back</button>
+	    	</div>
+	    	<div class="btn-container">
+	    		<button type="submit" class="btn btn-primary btn-round btn-lg my-btn">Start!</button>
+	    	</div>
+    	</div>
+	</form>
+</body>
+
+</html>

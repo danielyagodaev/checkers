@@ -36,6 +36,7 @@ h1 {
 	margin: 2rem;
 	height: 25rem;
 	font-size: 1.5rem;
+	width: 30rem;
 }
 
 .card-title {
@@ -54,6 +55,7 @@ h1 {
 .my-form-control {
 	width: 20rem;
 	height: 3rem;
+	margin-bottom: 1rem;
 }
 
 .radio-label {
@@ -80,4 +82,24 @@ input[type=radio]:checked + label {
 
 h5 {
 	color: #f96332;
+}
+
+.radios-container {
+	justify-content: center;
+	align-items: center;
+	font-size: 1.5rem;
+	text-align: center;
+
+}
+
+.radio-container {
+	margin-bottom: 2rem;
+	margin-left: 2rem;
+	margin-right: 2rem;
+}
+
+.big-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
