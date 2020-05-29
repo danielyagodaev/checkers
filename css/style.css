@@ -112,3 +112,8 @@ h5 {
 #player_2_name{
 	display: initial;
 }
+
+#board{
+	border: 2px solid;
+	border-radius: 15px;
+}
