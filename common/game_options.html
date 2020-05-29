@@ -8,30 +8,46 @@
 	<link href="../css/bootstrap.min.css" rel="stylesheet"/>
 	<link href="../css/now-ui-kit.css?v=1.3.0" rel="stylesheet"/>
 	<link href="../css/style.css" rel="stylesheet"/>
+	<script>
+		function player2IsHuman(){
+			const radios = document.getElementsByName("computer_level");
+			radios.forEach((radio)=>{
+				radio.checked = false;
+				radio.disabled = true;
+			});
+		}
+		function player2IsCoumputer(){
+			const radios = document.getElementsByName("computer_level");
+			radios.forEach((radio)=>{
+				radio.disabled = false;
+			})
+			radios[0].checked = true;
+		}
+	</script>
 </head>
 
 <body>
 	<h1>Checkers</h1>
 
-	<form action="">
+	<form action="board.html">
 		<div class="big-container">
 			<div class="card text-center">
 				<h4 class="card-title">Player 1</h4>
 				<div class="card-body">
 					<div class="form-group">
 						<h5>Name</h5>
-						<input type="text" name="player_1_name" id="player_1_name" class="form-control my-form-control" disabled>
+						<input type="text" name="player_1_name" id="player_1_name" placeholder="Player 1" class="form-control my-form-control">
+						<div class="radio-container">
+							<h5>Color</h5>
+							<input type="radio" id="player_1_color_red" name="player_1_color" value="red" checked="true">
+					        <label for="player_1_color_red" class="radio-label">Red</label>
+					        <input type="radio" id="player_1_color_white" name="player_1_color" value="white">
+					        <label for="player_1_color_white" class="radio-label">White</label>
+		    			</div>
 					</div>
 				</div>
 			</div>
 			<div class="radios-container">
-				<div class="radio-container">
-					<h5>Player 1 Color</h5>
-					<input type="radio" id="player_1_color_red" name="player_1_color" value="red" checked="true">
-			        <label for="player_1_color_red" class="radio-label">Red</label>
-			        <input type="radio" id="player_1_color_white" name="player_1_color" value="white">
-			        <label for="player_1_color_white" class="radio-label">White</label>
-		    	</div>
 		        <div class="radio-container">
 					<h5>Starting Color</h5>
 					<input type="radio" id="starting_color_red" name="starting_color" value="red" checked="true">
@@ -59,9 +75,23 @@
 				<div class="card-body">
 					<div class="form-group">
 						<h5>Name</h5>
-						<input type="text" name="player_2_name" id="player_2_name" class="form-control my-form-control" disabled>
-						<h5>Level</h5>
-						<input type="text" name="player_2_level" id="player_2_level" class="form-control my-form-control" disabled>
+						<input type="text" name="player_2_name" id="player_2_name" placeholder="Player 2" class="form-control my-form-control">
+						<div class="radio-container">
+							<h5>Type</h5>
+							<input type="radio" id="player_2_computer" name="player_2_type" value="computer" checked="true" onclick="player2IsCoumputer()">
+					        <label for="player_2_computer" class="radio-label">Computer</label>
+					        <input type="radio" id="player_2_human" name="player_2_type" value="human" onclick="player2IsHuman()">
+					        <label for="player_2_human" class="radio-label">Human</label>
+					    </div>
+					    <div class="radio-container" id="player_2_level_container">
+							<h5>Level</h5>
+							<input type="radio" id="level_easy" name="computer_level" value="easy" checked="true">
+					        <label for="level_easy" class="radio-label small-radio-label">Easy</label>
+					        <input type="radio" id="level_medium" name="computer_level" value="medium">
+					        <label for="level_medium" class="radio-label small-radio-label">Medium</label>
+					        <input type="radio" id="level_hard" name="computer_level" value="hard">
+					    	<label for="level_hard" class="radio-label small-radio-label">Hard</label>
+				    	</div>
 					</div>
 				</div>
 			</div>
@@ -69,7 +99,9 @@
     	<div class="space"></div>
     	<div class="container">
 	    	<div class="btn-container">
-	    		<button type="button" class="btn btn-primary btn-round btn-lg my-btn" onclick="history.back()">Back</button>
+	    		<a href="../index.html">
+	    			<button type="button" class="btn btn-primary btn-round btn-lg my-btn">Back</button>
+	    		</a>
 	    	</div>
 	    	<div class="btn-container">
 	    		<button type="submit" class="btn btn-primary btn-round btn-lg my-btn">Start!</button>

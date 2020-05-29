@@ -34,7 +34,7 @@ h1 {
 
 .card {
 	margin: 2rem;
-	height: 25rem;
+	height: 30rem;
 	font-size: 1.5rem;
 	width: 30rem;
 }
@@ -59,7 +59,7 @@ h1 {
 }
 
 .radio-label {
-	width: 7rem;
+	width: 8rem;
 }
 
 input[type=radio] {
@@ -102,4 +102,13 @@ h5 {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+
+.small-radio-label {
+	width: 7rem;
+}
+
+#player_2_name{
+	display: initial;
 }
