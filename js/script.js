@@ -14,193 +14,141 @@ const playerIdentifiers = {
 	PLAYER_2: -1
 };
 
-const piecesTypes = {
-	SIMPLE_PIECE: 1,
-	QUEEN_PIECE: 2
-};
+let boardRowsColumns, squareEdgeSize;
+let boardElement, boardContext;
+let player1Name, player2Name;
+let player1Color, player2Color, startingColor;
+let player2Type, computerLevel, sounds, showJumps;
+let currentPlayerTurn = null;
+let player1, player2, currentPlayer = null;
 
-const playersColors = {
-	RED: "red",
-	WHITE: "white"
-};
+let cursorMoveRow, cursorMoveColumn;
+let gameBoard, drawer;
 
-const piecesMap = new Map();
-
-let squareSize;
-let board, boardContext;
+const moveEffectTotalTime = 300;
+const moveEffectIterations = 10;
 
 window.onload = function() {
+	getAllInputParameters();
 	initVariables();
-	drawGame();
+	showPlayersDetails();
 	startGame();
 }
 
 function initVariables() {
-	board = document.getElementById("board");
-    boardContext = board.getContext("2d");
-    squareSize = Math.min(board.height, board.width) / boardArray.length;
-    initPieces();
+	boardElement = document.getElementById("board");
+    boardContext = boardElement.getContext("2d");
+    squareEdgeSize = Math.min(boardElement.height, boardElement.width) / boardArray.length;
+    boardRowsColumns = boardArray.length;
+    player2Color = (player1Color === playersColors.RED) ? playersColors.WHITE : playersColors.RED;
+
+    drawer = new Drawer(boardContext, boardRowsColumns, squareEdgeSize, 40);
+    gameBoard = new Board(boardArray);
+    gameBoard.initPieces(player1Color, player2Color, squareEdgeSize);
+
+    player1 = new HumanPlayer(playerIdentifiers.PLAYER_1 ,gameBoard, boardElement, player1Color, "yellow", drawer, performMove);
+    player2 = new HumanPlayer(playerIdentifiers.PLAYER_2, gameBoard, boardElement, player2Color, "blue", drawer, performMove);
 }
 
-function initPieces() {
-	let piecesCount = 0;
-	for (let i=0; i<boardArray.length; i++){
-		for (let j=0; j<boardArray[0].length; j++){
-			if (boardArray[i][j] !== 0){
-				const pieceId = piecesCount++;
-				const boardX = getCoordinateOnBoard(i);
-				const boardY = getCoordinateOnBoard(j);
-				const playerColor = (boardArray[i][j] === playerIdentifiers.PLAYER_1) ? playersColors.RED : playersColors.WHITE;
-				const piece = new Piece(playerColor, boardX, boardY);
-				piecesMap.set(pieceId, piece);
-			}
-		}
-	}
+function getAllInputParameters(){
+	player1Name = getParameterByName("player_1_name");
+    player2Name = getParameterByName("player_2_name");
+    player1Color = getParameterByName("player_1_color");
+    startingColor = getParameterByName("starting_color");
+    player2Type = getParameterByName("player_2_type");
+    computerLevel = getParameterByName("computer_level");
+    showJumps = getParameterByName("highlight_jumps");
+    sounds = getParameterByName("sounds");
 }
 
-function getCoordinateOnBoard(x){
-	return (x * squareSize) + (0.5 * squareSize);
+function getParameterByName(name, url) {
+    if (!url){
+    	url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results){
+    	return null;
+    }
+    if (!results[2]){
+    	return '';
+    }
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+function showPlayersDetails(){
+	const player1NameElement = document.getElementById("player_1_name_label");
+	player1NameElement.innerText = player1Name;
+	const player1ColorElement = document.getElementById("player_1_color_label");
+	player1ColorElement.innerText = player1Color;
+	const player2NameElement = document.getElementById("player_2_name_label");
+	player2NameElement.innerText = player2Name;
+	const player2ColorElement = document.getElementById("player_2_color_label");
+	player2ColorElement.innerText = player2Color;
+
+}
+
 
 function drawGame() {
-	drawBoard();
-	drawPieces();
-}
-
-function drawBoard() {
-	for (let i=0; i<boardArray.length; i++){
-		for (let j=0; j<boardArray[0].length; j++){
-			drawSingleSquare(i,j);
-		}
-	}
-}
-
-function drawSingleSquare(i,j) {
-	const squareWithoutPieceFirstColor = "#a4aeb8";
-	const squareWithoutPieceSecondColor = "#b1b9c2";
-	const squareWithPieceFirstColor = "#515d68" ;
-	const squareWithPieceSecondColor = "#5b6875";
-	const boardX = i * squareSize;
-	const boardY = j * squareSize;
-	let firstColor, secondColor, gradient;
-	if ((i % 2) === (j % 2)){
-		gradient = boardContext.createLinearGradient(boardX, boardY+(squareSize/2), boardX+squareSize, boardY+(squareSize/2));
-		firstColor = squareWithoutPieceFirstColor;
-		secondColor = squareWithoutPieceSecondColor;
-	}
-	else {
-		gradient = boardContext.createLinearGradient(boardX+(squareSize/2), boardY, boardX+(squareSize/2), boardY+squareSize);
-		firstColor = squareWithPieceFirstColor;
-		secondColor = squareWithPieceSecondColor;
-	}
-	let currentColor, colorStopSum = 0;
-	const colorStops = 10;
-	for (let k=0; k<colorStops; k++){
-		currentColor = ((k % 2) === 0) ? firstColor : secondColor;
-		gradient.addColorStop(colorStopSum, currentColor);
-		colorStopSum += (1 / colorStops);
-	}
-	boardContext.fillStyle = gradient;
-    boardContext.fillRect(boardX, boardY, squareSize, squareSize);
-}
-
-function drawPieces() {
-	for (const [pieceId, piece] of piecesMap){
-		piece.drawPiece();
+	drawer.drawBoard();
+	for (const [pieceId, piece] of gameBoard.piecesMap){
+		drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY, piece.pieceType === piecesTypes.QUEEN_PIECE);
 	}
 }
 
 function startGame() {
+	drawGame();
+	moveToNextPlayer();
+}
+
+function moveToNextPlayer(){
+	if (currentPlayer === null){
+		if ((player1Color === playersColors.RED && startingColor === playersColors.RED) ||
+			(player1Color === playersColors.WHITE && startingColor === playersColors.WHITE)){
+			currentPlayer = player1;
+		}
+		else{
+			currentPlayer = player2;
+		}
+	}
+	else{
+		currentPlayer = (currentPlayer === player1) ? player2 : player1;
+	}
+	currentPlayer.play();
+}
+
+function performMove(fromRow, fromColumn, toRow, toColumn){
+	console.log("performing move");
+	const piece = gameBoard.getPiece(fromRow, fromColumn);
+	const moveEffectSingleIterationTime = moveEffectTotalTime/moveEffectIterations;
+	const xDelta = ((toRow - fromRow) * squareEdgeSize) / moveEffectIterations;
+    const yDelta = ((toColumn - fromColumn) * squareEdgeSize) / moveEffectIterations;
+	for (let i=0; i<moveEffectIterations; i++){
+		setTimeout(()=>{
+			piece.boardX += xDelta;
+			piece.boardY += yDelta;
+			drawGame();
+		}, i*moveEffectSingleIterationTime);
+	}
+	setTimeout(()=>{
+		postMoveAction(fromRow, fromColumn, toRow, toColumn);
+	}, moveEffectTotalTime)
+
 
 }
 
-class Piece {
-
-	constructor(playerColor, boardX, boardY){
-		this.playerColor = playerColor;
-		this.boardX = boardX;
-		this.boardY = boardY;
-		this.pieceType = piecesTypes.SIMPLE_PIECE;
+function postMoveAction(fromRow, fromColumn, toRow, toColumn){
+	boardArray[toRow][toColumn] = boardArray[fromRow][fromColumn];
+	boardArray[fromRow][fromColumn] = 0;
+	if (gameBoard.isGameEnded()){
+		endGame();
 	}
-
-	static _getPieceRadius(){
-		return 40;
+	else{
+		moveToNextPlayer();
 	}
+}
 
-	drawPiece(){
-		let pieceFirstColor, pieceSecondColor, queenColor;
-		if (this.playerColor === playersColors.RED){
-			pieceFirstColor = "#800000";
-			pieceSecondColor = "#a24545";
-			queenColor = "#000000";
-		}
-		else {
-			pieceFirstColor = "#b2b2a0";
-			pieceSecondColor = "#dedec8";
-			queenColor = "#404040";
-		}
-		const pieceRadius = Piece._getPieceRadius();
-		this._drawCircle(pieceFirstColor, pieceSecondColor, pieceRadius);
-		if (this.pieceType === piecesTypes.QUEEN_PIECE){
-			this._addQueenSymbol(queenColor);
-		}
-	}
-
-	_drawCircle(pieceFirstColor, pieceSecondColor, radius){
-        boardContext.beginPath();
-        boardContext.arc(this.boardX, this.boardY, radius, 0, 2*Math.PI);
-        const pieceGradient = boardContext.createRadialGradient(this.boardX - radius, this.boardY - radius, 0, this.boardX - radius, this.boardY - radius, squareSize);
-        pieceGradient.addColorStop(0, pieceFirstColor);
-        pieceGradient.addColorStop(0.8, pieceFirstColor);
-        pieceGradient.addColorStop(1, pieceSecondColor);
-        boardContext.shadowColor = 'black';
-        boardContext.shadowBlur = 1;
-        boardContext.shadowOffsetX = 0;
-        boardContext.shadowOffsetY = 0;
-        boardContext.fillStyle = pieceGradient;
-        boardContext.lineWidth = 1;
-        boardContext.strokeStyle = 'black';
-        boardContext.fill();
-        boardContext.stroke();
-        boardContext.closePath();
-	}
-
-	_addQueenSymbol(queenColor){
-	    boardContext.beginPath();
-        boardContext.moveTo(this.boardX - 12, this.boardY + 7);
-        boardContext.lineTo(this.boardX - 17, this.boardY - 7) ;
-        boardContext.bezierCurveTo(this.boardX - 17, this.boardY, this.boardX, this.boardY, this.boardX, this.boardY - 12);
-        boardContext.bezierCurveTo(this.boardX, this.boardY, this.boardX + 17, this.boardY, this.boardX + 17, this.boardY - 7);
-        boardContext.lineTo(this.boardX + 12, this.boardY + 7);
-        boardContext.lineTo(this.boardX - 12, this.boardY + 7);
-        boardContext.fillStyle = queenColor;
-        boardContext.fill();
-        boardContext.closePath();
-
-        boardContext.beginPath();
-        boardContext.rect(this.boardX - 12, this.boardY + 9, 24, 4);
-        boardContext.fillStyle = queenColor;
-        boardContext.fill();
-        boardContext.closePath();
-
-        boardContext.beginPath();
-        boardContext.arc(this.boardX - 17, this.boardY - 7, 2, 0, 2*Math.PI);
-        boardContext.fillStyle = queenColor;
-        boardContext.fill();
-        boardContext.closePath();
-
-        boardContext.beginPath();
-        boardContext.arc(this.boardX, this.boardY - 12, 2, 0, 2*Math.PI);
-        boardContext.fillStyle = queenColor;
-        boardContext.fill();
-        boardContext.closePath();
-
-        boardContext.beginPath();
-        boardContext.arc(this.boardX + 17, this.boardY - 7, 2, 0, 2*Math.PI);
-        boardContext.fillStyle = queenColor;
-        boardContext.fill();
-        boardContext.closePath();
-	}
-
-
+function endGame(){
+	// TODO
 }
