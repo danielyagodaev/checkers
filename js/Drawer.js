@@ -29,12 +29,14 @@ class Drawer {
 		const boardY = cellColumn * this._cellEdgeSize;
 		let firstColor, secondColor, gradient;
 		if ((cellRow % 2) === (cellColumn % 2)){
-			gradient = boardContext.createLinearGradient(boardX, boardY+(this._cellEdgeSize/2), boardX+this._cellEdgeSize, boardY+(this._cellEdgeSize/2));
+			gradient = this._boardContext.createLinearGradient(boardX, boardY+(this._cellEdgeSize/2),
+				boardX+this._cellEdgeSize, boardY+(this._cellEdgeSize/2));
 			firstColor = squareWithoutPieceFirstColor;
 			secondColor = squareWithoutPieceSecondColor;
 		}
 		else {
-			gradient = boardContext.createLinearGradient(boardX+(this._cellEdgeSize/2), boardY, boardX+(this._cellEdgeSize/2), boardY+this._cellEdgeSize);
+			gradient = this._boardContext.createLinearGradient(boardX+(this._cellEdgeSize/2), boardY,
+				boardX+(this._cellEdgeSize/2), boardY+this._cellEdgeSize);
 			firstColor = squareWithPieceFirstColor;
 			secondColor = squareWithPieceSecondColor;
 		}
@@ -78,27 +80,28 @@ class Drawer {
 		}
 		this._drawSimplePiece(pieceFirstColor, pieceSecondColor, boardX, boardY);
 		if (addQueenSymbol){
-			this._addQueenSymbol(queenColor, boardX, boardY);
+			this._drawQueenSymbol(queenColor, boardX, boardY);
 		}
 	}
 
 	_drawSimplePiece(pieceFirstColor, pieceSecondColor, boardX, boardY){
-        boardContext.beginPath();
-        boardContext.arc(boardX, boardY, this._pieceRadius, 0, 2*Math.PI);
-        const pieceGradient = boardContext.createRadialGradient(boardX - this._pieceRadius, boardY - this._pieceRadius, 0, boardX - this._pieceRadius, boardY - this._pieceRadius, this._cellEdgeSize);
+		this._boardContext.beginPath();
+		this._boardContext.arc(boardX, boardY, this._pieceRadius, 0, 2*Math.PI);
+        const pieceGradient = this._boardContext.createRadialGradient(boardX - this._pieceRadius,
+			boardY - this._pieceRadius, 0, boardX - this._pieceRadius, boardY - this._pieceRadius, this._cellEdgeSize);
         pieceGradient.addColorStop(0, pieceFirstColor);
         pieceGradient.addColorStop(0.8, pieceFirstColor);
         pieceGradient.addColorStop(1, pieceSecondColor);
-        boardContext.shadowColor = 'black';
-        boardContext.shadowBlur = 1;
-        boardContext.shadowOffsetX = 0;
-        boardContext.shadowOffsetY = 0;
-        boardContext.fillStyle = pieceGradient;
-        boardContext.lineWidth = 1;
-        boardContext.strokeStyle = 'black';
-        boardContext.fill();
-        boardContext.stroke();
-        boardContext.closePath();
+		this._boardContext.shadowColor = 'black';
+		this._boardContext.shadowBlur = 1;
+		this._boardContext.shadowOffsetX = 0;
+		this._boardContext.shadowOffsetY = 0;
+		this._boardContext.fillStyle = pieceGradient;
+		this._boardContext.lineWidth = 1;
+		this._boardContext.strokeStyle = 'black';
+		this._boardContext.fill();
+		this._boardContext.stroke();
+		this._boardContext.closePath();
 	}
 
 	_drawQueenSymbol(queenColor, boardX, boardY){

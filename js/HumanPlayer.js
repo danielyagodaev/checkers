@@ -1,20 +1,32 @@
 const MOUSE_DOWN_EVENT = "mousedown";
 const MOUSE_MOVE_EVENT = "mousemove";
 
+const playerIds = {
+	PLAYER_1: 1,
+	PLAYER_2: -1
+};
+
+const cursorColors = {
+	PLAYER_1: "yellow",
+	PLAYER_2: "blue",
+	SELECTED: "red"
+};
+
 class HumanPlayer {
 
-	constructor(playerId, gameBoard, boardElement, playerColor, cursorColor, drawer, callback){
+	constructor(playerId, playerColor, boardRules, postMoveFunc, boardElement, drawer){
 		this._playerId = playerId;
-		this._gameBoard = gameBoard;
-		this._boardElement = boardElement;
 		this._playerColor = playerColor;
-		this._cursorColor = cursorColor;
+		this._boardRules = boardRules;
+		this._postMoveFunc = postMoveFunc;
+		this._cursorColor = (playerId === playerIds.PLAYER_1) ? cursorColors.PLAYER_1 : cursorColors.PLAYER_2;
+		this._boardElement = boardElement;
 		this._drawer = drawer;
-		this._callback = callback;
 		this._cursorRow = 0;
 		this._cursorColumn = 0;
 		this._selectedCursorRow = null;
 		this._selectedCursorColumn = null;
+		this._inContinuousMoveMode = false;
 		this._eventListener = (e) => {this._cursorMovementEventListener(e)};
 	}
 
@@ -22,16 +34,19 @@ class HumanPlayer {
 		return this._playerColor;
 	}
 
-	get cursorRow(){
-		return this._cursorRow;
-	}
-
-	get cursorColumn(){
-		return this._cursorColumn;
+	set inContinuousMoveMode(inContinuousMoveMode){
+		this._inContinuousMoveMode = inContinuousMoveMode;
 	}
 
 	play(){
-		this._drawer.drawCursor(this._cursorRow, this._cursorColumn, this._cursorColor);
+		if (this._inContinuousMoveMode){
+			this._selectedCursorRow = this._cursorRow;
+			this._selectedCursorColumn = this._cursorColumn;
+			this._drawer.drawCursor(this._selectedCursorRow, this._selectedCursorColumn, cursorColors.SELECTED);
+		}
+		else {
+			this._drawer.drawCursor(this._cursorRow, this._cursorColumn, this._cursorColor);
+		}
 		this._setEventListeners();
 	}
 
@@ -47,57 +62,66 @@ class HumanPlayer {
 
 	_cursorMovementEventListener(e){
 		this._removeEventListeners();
-		const cellRow = HumanPlayer.transformCoordinateIntoCellNumber(e.offsetX);
-		const cellColumn = HumanPlayer.transformCoordinateIntoCellNumber(e.offsetY);
-		if (cellRow >=0 && cellRow < boardRowsColumns && cellColumn >= 0 && cellColumn < boardRowsColumns){
+		const cellRow = HumanPlayer._transformCoordinateIntoCellNumber(e.offsetX);
+		const cellColumn = HumanPlayer._transformCoordinateIntoCellNumber(e.offsetY);
+		if (cellRow >=0 && cellRow < ROWS_COLUMNS_NUM && cellColumn >= 0 && cellColumn < ROWS_COLUMNS_NUM){
 			if (e.type === MOUSE_MOVE_EVENT){	
-				if (!(this._cellIsAlreadyHighlighted(this._cursorRow, this._cursorColumn))){
-					this._drawer.removeCursor(this._cursorRow, this._cursorColumn);
-					const piece = this._gameBoard.getPiece(this._cursorRow, this._cursorColumn);
-					if (piece !== null){
-						this._drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY, piece.pieceType === piecesTypes.QUEEN_PIECE);
-					}
-				}
-				this._cursorRow = cellRow;
-				this._cursorColumn = cellColumn;
-				if (!(this._cellIsAlreadyHighlighted(this._cursorRow, this._cursorColumn))){
-					this._drawer.drawCursor(cellRow, cellColumn, this._cursorColor);
-				}
-				this._setEventListeners();
+				this._handleMouseMoveEvent(cellRow, cellColumn);
 			}
-
 			else if (e.type === MOUSE_DOWN_EVENT){
-				if (this._selectedCursorRow === null && this._selectedCursorColumn === null){
-					if (this._gameBoard.canSelectPiece(this._playerId, this._cursorRow, this._cursorColumn)){
-						this._drawer.drawCursor(this._cursorRow, this._cursorColumn, "red");
-						this._selectedCursorRow = cellRow;
-						this._selectedCursorColumn = cellColumn;
-					}
-					this._setEventListeners();
-				}
-				else{
-					if (this._selectedCursorRow === cellRow && this._selectedCursorColumn === cellColumn){
-						this._drawer.drawCursor(cellRow, cellColumn, this._cursorColor);
-						this._selectedCursorRow = null;
-						this._selectedCursorColumn = null;
-						this._setEventListeners();
-					}
-					else if (this._gameBoard.canMove(this._playerId, this._selectedCursorRow, this._selectedCursorColumn, cellRow, cellColumn)){	
-						const fromRow = this._selectedCursorRow;
-						const fromColumn = this._selectedCursorColumn;
-						this._selectedCursorRow = null;
-						this._selectedCursorColumn = null;
-						this._callback(fromRow, fromColumn, cellRow, cellColumn);
-					}
-					else{
-						this._setEventListeners();
-					}
-				}
-
+				this._handleMouseDownEvent(cellRow, cellColumn);
 			}
 		}
 		else{
 			this._setEventListeners();
+		}
+	}
+
+	_handleMouseMoveEvent(cellRow, cellColumn){
+		if (!(this._cellIsAlreadyHighlighted(this._cursorRow, this._cursorColumn))){
+			this._drawer.removeCursor(this._cursorRow, this._cursorColumn);
+			const piece = this._boardRules.getPiece(this._cursorRow, this._cursorColumn);
+			if (piece !== null){
+				this._drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY,
+					piece.pieceType === piecesTypes.QUEEN_PIECE);
+			}
+		}
+		this._cursorRow = cellRow;
+		this._cursorColumn = cellColumn;
+		if (!(this._cellIsAlreadyHighlighted(this._cursorRow, this._cursorColumn))){
+			this._drawer.drawCursor(cellRow, cellColumn, this._cursorColor);
+		}
+		this._setEventListeners();
+	}
+
+	_handleMouseDownEvent(cellRow, cellColumn){
+		if (this._selectedCursorRow === null && this._selectedCursorColumn === null){
+			if (this._boardRules.canSelectPiece(this._playerId, this._cursorRow, this._cursorColumn)){
+				this._drawer.drawCursor(this._cursorRow, this._cursorColumn, cursorColors.SELECTED);
+				this._selectedCursorRow = cellRow;
+				this._selectedCursorColumn = cellColumn;
+			}
+			this._setEventListeners();
+		}
+		else{
+			if (!this._inContinuousMoveMode && this._selectedCursorRow === cellRow &&
+				this._selectedCursorColumn === cellColumn){
+				this._drawer.drawCursor(cellRow, cellColumn, this._cursorColor);
+				this._selectedCursorRow = null;
+				this._selectedCursorColumn = null;
+				this._setEventListeners();
+			}
+			else if (this._boardRules.canMove(this._playerId, this._selectedCursorRow, this._selectedCursorColumn,
+				cellRow, cellColumn)){
+				const fromRow = this._selectedCursorRow;
+				const fromColumn = this._selectedCursorColumn;
+				this._selectedCursorRow = null;
+				this._selectedCursorColumn = null;
+				this._postMoveFunc(this._playerId, fromRow, fromColumn, cellRow, cellColumn);
+			}
+			else{
+				this._setEventListeners();
+			}
 		}
 	}
 
@@ -108,8 +132,8 @@ class HumanPlayer {
 		return false;
 	}
 
-	static transformCoordinateIntoCellNumber(toConvert){
-	    return (Math.floor(toConvert / 100));
+	static _transformCoordinateIntoCellNumber(toConvert){
+	    return (Math.floor(toConvert / CELL_EDGE_SIZE));
 	}
 
 }
