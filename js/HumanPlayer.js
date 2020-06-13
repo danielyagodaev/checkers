@@ -111,7 +111,7 @@ class HumanPlayer {
 				this._selectedCursorColumn = null;
 				this._setEventListeners();
 			}
-			else if (this._boardRules.canMove(this._playerId, this._selectedCursorRow, this._selectedCursorColumn,
+			else if (this._boardRules._canMove(this._playerId, this._selectedCursorRow, this._selectedCursorColumn,
 				cellRow, cellColumn)){
 				const fromRow = this._selectedCursorRow;
 				const fromColumn = this._selectedCursorColumn;
