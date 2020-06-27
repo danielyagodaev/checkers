@@ -1,8 +1,3 @@
-const playerTypes = {
-	HUMAN: "human",
-	COMPUTER: "computer"
-};
-
 window.onload = function() {
 	const player1Name = getParameterByName("player_1_name");
 	const player2Name = getParameterByName("player_2_name");
@@ -16,7 +11,7 @@ window.onload = function() {
 	const player2Color = (player1Color === playersColors.RED) ? playersColors.WHITE : playersColors.RED;
 	showPlayersDetails(player1Name, player1Color, player2Name, player2Color);
 
-	const board = new Board(playerTypes.HUMAN, player1Color, player2Type, player2Color, startingColor,
+	const board = new Board(player1Color, player2Type, player2Color, startingColor,
 		computerLevel, sounds, highlight_jumps);
 	board.play();
 }

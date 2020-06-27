@@ -5,30 +5,33 @@ const PIECE_RADIUS = 40;
 const MOVE_EFFECT_TOTAL_TIME = 300;
 const MOVE_EFFECT_ITERATIONS = 10;
 
+const playerTypes = {
+	HUMAN: "human",
+	COMPUTER: "computer"
+};
+
 class Board {
 
-	constructor(player1Type, player1Color, player2Type, player2Color, startingColor, computerLevel, sounds,
+	constructor(player1Color, player2Type, player2Color, startingColor, computerLevel, sounds,
 				highlightMoves){
 		this._boardArray = null;
-		this._boardRules = null;
 		this._player1 = null;
 		this._player2 = null;
 		this._currentPlayer = null;
-		this._piecesMap = new Map();
+		this._piecesManager = new PiecesManager();
 		this._drawer = null;
 		this._sounds = sounds;
 		this._highlightMoves = highlightMoves;
-		this._init(player1Type, player1Color, player2Type, player2Color, startingColor, computerLevel);
+		this._init(player1Color, player2Type, player2Color, startingColor, computerLevel);
 	}
 
-	_init(player1Type, player1Color, player2Type, player2Color, startingColor, computerLevel){
+	_init(player1Color, player2Type, player2Color, startingColor, computerLevel){
 		this._initBoardArray();
 		this._initPieces(player1Color, player2Color, CELL_EDGE_SIZE);
-		this._boardRules = new BoardRules(this._boardArray, this._piecesMap);
 		const boardElement = document.getElementById("board");
 		const boardContext = boardElement.getContext("2d");
 		this._drawer = new Drawer(boardContext, ROWS_COLUMNS_NUM, CELL_EDGE_SIZE, PIECE_RADIUS);
-		this._initPlayers(player1Type, player1Color, player2Type, player2Color, startingColor, computerLevel,
+		this._initPlayers(player1Color, player2Type, player2Color, startingColor, computerLevel,
 			boardElement);
 	}
 
@@ -45,12 +48,18 @@ class Board {
 		];
 	}
 
-	_initPlayers(player1Type, player1Color, player2Type, player2Color, startingColor, computerLevel, boardElement){
+	_initPlayers(player1Color, player2Type, player2Color, startingColor, computerLevel, boardElement){
 		const postMoveFunc = this._getPostMoveFunc();
-		this._player1 = new HumanPlayer(playerIds.PLAYER_1, player1Color, this._boardRules, postMoveFunc,
-			boardElement, this._drawer);
-		this._player2 = new HumanPlayer(playerIds.PLAYER_2, player2Color, this._boardRules, postMoveFunc,
-			boardElement, this._drawer);
+		this._player1 = new HumanPlayer(this._boardArray, playerIds.PLAYER_1, player1Color, postMoveFunc,
+			this._piecesManager, boardElement, this._drawer);
+		if (player2Type === playerTypes.HUMAN) {
+			this._player2 = new HumanPlayer(this._boardArray, playerIds.PLAYER_2, player2Color, postMoveFunc,
+				this._piecesManager, boardElement, this._drawer);
+		}
+		else{
+			this._player2 = new ComputerPlayer(this._boardArray, playerIds.PLAYER_2, player2Color, postMoveFunc,
+				computerLevel);
+		}
 		if (player1Color === startingColor){
 			this._currentPlayer = this._player1;
 		}
@@ -59,16 +68,12 @@ class Board {
 		}
 	}
 
-	_initPieces(player1Color, player2Color, CELL_EDGE_SIZE){
-		let piecesCount = 0;
-		for (let i=0; i<this._boardArray.length; i++){
-			for (let j=0; j<this._boardArray[i].length; j++){
+	_initPieces(player1Color, player2Color){
+		for (let i=0; i<ROWS_COLUMNS_NUM; i++){
+			for (let j=0; j<ROWS_COLUMNS_NUM; j++){
 				if (this._boardArray[i][j] !== 0){
-					const boardX = this._getCoordinateOnBoard(i, CELL_EDGE_SIZE);
-					const boardY = this._getCoordinateOnBoard(j, CELL_EDGE_SIZE);
 					const playerColor = (this._boardArray[i][j] > 0) ? player1Color : player2Color;
-					const piece = new Piece(playerColor, boardX, boardY);
-					this._piecesMap.set(++piecesCount, piece);
+					this._piecesManager.createAndAddNewPiece(playerColor, i, j);
 				}
 			}
 		}
@@ -81,7 +86,7 @@ class Board {
 
 	_getPostMoveFunc(){
 		return (playerId, fromRow, fromColumn, toRow, toColumn) => {
-			const piece = this._boardRules.getPiece(fromRow, fromColumn);
+			const piece = this._piecesManager.getPiece(fromRow, fromColumn);
 			const moveEffectSingleIterationTime = MOVE_EFFECT_TOTAL_TIME / MOVE_EFFECT_ITERATIONS;
 			const xDelta = ((toRow - fromRow) * CELL_EDGE_SIZE) / MOVE_EFFECT_ITERATIONS;
 			const yDelta = ((toColumn - fromColumn) * CELL_EDGE_SIZE) / MOVE_EFFECT_ITERATIONS;
@@ -99,18 +104,31 @@ class Board {
 	}
 
 	_postMoveAction(playerId, fromRow, fromColumn, toRow, toColumn){
-		this._boardRules.applyMoveOnBoard(fromRow, fromColumn, toRow, toColumn);
-		if (this._boardRules.isGameEnded(playerId)){
-			alert("Game Ended!");
+		BoardRules.applyMoveOnBoard(this._boardArray, fromRow, fromColumn, toRow, toColumn);
+		this._updatePieces(fromRow, fromColumn, toRow, toColumn);
+		if (BoardRules.isGameEnded(this._boardArray, playerId)){
+			setTimeout(() => alert("Game Ended!"), 500);
 		}
 		else {
 			let inContinuousMoveMode = true;
-			if (!this._boardRules.canPerformAnotherMove(playerId, fromRow, fromColumn, toRow, toColumn)){
+			if (!BoardRules.canPerformAnotherMove(this._boardArray, playerId, fromRow, fromColumn, toRow, toColumn)){
 				this._currentPlayer = this._getNextPlayer(this._currentPlayer);
 				inContinuousMoveMode = false;
 			}
 			this._currentPlayer.inContinuousMoveMode = inContinuousMoveMode;
 			this.play(inContinuousMoveMode);
+		}
+	}
+
+	_updatePieces(fromRow, fromColumn, toRow, toColumn){
+		if (BoardRules.pieceIsQueen(this._boardArray, toRow, toColumn)){
+			const movingPiece = this._piecesManager.getPiece(toRow, toColumn);
+			movingPiece.changePieceTypeToQueen();
+		}
+		if (BoardRules.isJumpMove(fromRow, fromColumn, toRow, toColumn)){
+			const opponentPieceRow = BoardRules.getJumpedOverRowColumn(fromRow, toRow);
+			const opponentPieceColumn = BoardRules.getJumpedOverRowColumn(fromColumn, toColumn);
+			this._piecesManager.deletePiece(opponentPieceRow, opponentPieceColumn);
 		}
 	}
 
@@ -124,14 +142,12 @@ class Board {
 	}
 
 	_drawAllPieces(){
-		for (const [_, piece] of this._piecesMap){
+		const pieces = this._piecesManager.getAllPieces();
+		for (let i=0; i<pieces.length; i++){
+			const piece = pieces[i];
 			this._drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY,
 				piece.pieceType === piecesTypes.QUEEN_PIECE);
 		}
-	}
-
-	_getCoordinateOnBoard(x){
-		return (x * CELL_EDGE_SIZE) + (0.5 * CELL_EDGE_SIZE);
 	}
 
 }

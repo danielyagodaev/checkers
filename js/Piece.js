@@ -5,11 +5,16 @@ const piecesTypes = {
 
 class Piece {
 
-	constructor(playerColor, boardX, boardY){
+	constructor(pieceId, playerColor, boardX, boardY){
+		this._pieceId = pieceId;
 		this._playerColor = playerColor;
 		this._boardX = boardX;
 		this._boardY = boardY;
 		this._pieceType = piecesTypes.SIMPLE_PIECE;
+	}
+
+	get pieceId(){
+		return this._pieceId;
 	}
 
 	get playerColor(){

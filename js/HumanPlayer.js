@@ -14,11 +14,12 @@ const cursorColors = {
 
 class HumanPlayer {
 
-	constructor(playerId, playerColor, boardRules, postMoveFunc, boardElement, drawer){
+	constructor(boardArray, playerId, playerColor, postMoveFunc, piecesManager, boardElement, drawer){
+		this._boardArray = boardArray;
 		this._playerId = playerId;
 		this._playerColor = playerColor;
-		this._boardRules = boardRules;
 		this._postMoveFunc = postMoveFunc;
+		this._piecesManager = piecesManager;
 		this._cursorColor = (playerId === playerIds.PLAYER_1) ? cursorColors.PLAYER_1 : cursorColors.PLAYER_2;
 		this._boardElement = boardElement;
 		this._drawer = drawer;
@@ -80,7 +81,7 @@ class HumanPlayer {
 	_handleMouseMoveEvent(cellRow, cellColumn){
 		if (!(this._cellIsAlreadyHighlighted(this._cursorRow, this._cursorColumn))){
 			this._drawer.removeCursor(this._cursorRow, this._cursorColumn);
-			const piece = this._boardRules.getPiece(this._cursorRow, this._cursorColumn);
+			const piece = this._piecesManager.getPiece(this._cursorRow, this._cursorColumn);
 			if (piece !== null){
 				this._drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY,
 					piece.pieceType === piecesTypes.QUEEN_PIECE);
@@ -96,7 +97,7 @@ class HumanPlayer {
 
 	_handleMouseDownEvent(cellRow, cellColumn){
 		if (this._selectedCursorRow === null && this._selectedCursorColumn === null){
-			if (this._boardRules.canSelectPiece(this._playerId, this._cursorRow, this._cursorColumn)){
+			if (BoardRules.canSelectPiece(this._boardArray, this._playerId, this._cursorRow, this._cursorColumn)){
 				this._drawer.drawCursor(this._cursorRow, this._cursorColumn, cursorColors.SELECTED);
 				this._selectedCursorRow = cellRow;
 				this._selectedCursorColumn = cellColumn;
@@ -111,8 +112,8 @@ class HumanPlayer {
 				this._selectedCursorColumn = null;
 				this._setEventListeners();
 			}
-			else if (this._boardRules._canMove(this._playerId, this._selectedCursorRow, this._selectedCursorColumn,
-				cellRow, cellColumn)){
+			else if (BoardRules.canMove(this._boardArray, this._playerId, this._selectedCursorRow,
+				this._selectedCursorColumn, cellRow, cellColumn)){
 				const fromRow = this._selectedCursorRow;
 				const fromColumn = this._selectedCursorColumn;
 				this._selectedCursorRow = null;

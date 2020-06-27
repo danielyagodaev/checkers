@@ -1,19 +1,24 @@
+const moveTypes = {
+    SIMPLE_MOVE: 1,
+    JUMP_MOVE: 2
+};
+
+const moveOptions = {
+    UP: 1,
+    DOWN: 2
+};
+
 class BoardRules {
 
-    constructor(boardArray, piecesMap) {
-        this._boardArray = boardArray;
-        this._piecesMap = piecesMap;
+    static _isEmptyCell(boardArray, cellRow, cellColumn){
+        return (boardArray[cellRow][cellColumn] === 0);
     }
 
-    _isEmptyCell(cellRow, cellColumn){
-        return (this._boardArray[cellRow][cellColumn] === 0);
-    }
-
-    _canMove(playerId, fromRow, fromColumn, toRow, toColumn){
-        if ((toRow >= 0) && (toRow < this._boardArray.length) && (toColumn >= 0) &&
-            (toColumn < this._boardArray[toRow].length) && (this._isEmptyCell(toRow, toColumn))){
-            const playerPiece = this.getPiece(fromRow, fromColumn);
-            const pieceType = playerPiece.pieceType;
+    static canMove(boardArray, playerId, fromRow, fromColumn, toRow, toColumn){
+        if ((toRow >= 0) && (toRow < ROWS_COLUMNS_NUM) && (toColumn >= 0) &&
+            (toColumn < ROWS_COLUMNS_NUM) && (BoardRules._isEmptyCell(boardArray, toRow, toColumn))){
+            const pieceType = (Math.abs(boardArray[fromRow][fromColumn]) === piecesTypes.SIMPLE_PIECE) ?
+                piecesTypes.SIMPLE_PIECE : piecesTypes.QUEEN_PIECE;
             let columnDelta;
             if (pieceType === piecesTypes.SIMPLE_PIECE && playerId === playerIds.PLAYER_1){
                 columnDelta = fromColumn - toColumn;
@@ -31,24 +36,25 @@ class BoardRules {
             else if (columnDelta === 2 || (columnDelta === -2 && pieceType === piecesTypes.QUEEN_PIECE)){
                 const middleRow = (fromRow + toRow) / 2;
                 const middleColumn = (fromColumn + toColumn) / 2;
-                const opponentId = this._getOpponentId(playerId);
-                return this._pieceBelongsToPlayer(opponentId, middleRow, middleColumn);
+                const opponentId = BoardRules.getOpponentId(playerId);
+                return BoardRules._pieceBelongsToPlayer(boardArray, opponentId, middleRow, middleColumn);
             }
         }
         return false;
     }
 
-    canPerformAnotherMove(playerId, fromRow, fromColumn, toRow, toColumn){
+    static canPerformAnotherMove(boardArray, playerId, fromRow, fromColumn, toRow, toColumn){
         if (Math.abs(toRow - fromRow) === 2 && Math.abs(toColumn - fromColumn) === 2){
             // Must be jump move in order to perform another move
-            return this._pieceHasJumpMoves(playerId, toRow, toColumn);
+            return BoardRules._pieceHasJumpMoves(boardArray, playerId, toRow, toColumn);
         }
     }
 
-    _playerHasMoves(playerId){
+    static _playerHasMoves(boardArray, playerId){
         for (let i=0; i<ROWS_COLUMNS_NUM; i++){
             for (let j=0; j<ROWS_COLUMNS_NUM; j++){
-                if (this._pieceBelongsToPlayer(playerId, i, j) && this._pieceHasMoves(playerId, i, j)){
+                if (BoardRules._pieceBelongsToPlayer(boardArray, playerId, i, j) &&
+                    BoardRules._pieceHasMoves(boardArray, playerId, i, j)){
                     return true;
                 }
             }
@@ -56,97 +62,224 @@ class BoardRules {
         return false;
     }
 
-    _pieceHasMoves(playerId, pieceRow, pieceColumn){
-        return this._pieceHasSimpleMoves(playerId, pieceRow, pieceColumn) ||
-            this._pieceHasJumpMoves(playerId, pieceRow, pieceColumn);
+    static _pieceHasMoves(boardArray, playerId, pieceRow, pieceColumn){
+        return BoardRules._pieceHasSimpleMoves(boardArray, playerId, pieceRow, pieceColumn) ||
+            BoardRules._pieceHasJumpMoves(boardArray, playerId, pieceRow, pieceColumn);
     }
 
-    _pieceHasSimpleMoves(playerId, pieceRow, pieceColumn){
-        if (this._pieceBelongsToPlayer(playerId, pieceRow, pieceColumn)) {
+    static _pieceHasSimpleMoves(boardArray, playerId, pieceRow, pieceColumn){
+        if (BoardRules._pieceBelongsToPlayer(boardArray, playerId, pieceRow, pieceColumn)) {
             return (
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow + 1, pieceColumn + 1) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow + 1, pieceColumn - 1) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow - 1, pieceColumn + 1) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow - 1, pieceColumn - 1)
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow + 1, pieceColumn + 1) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow + 1, pieceColumn - 1) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow - 1, pieceColumn + 1) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow - 1, pieceColumn - 1)
             );
         }
     }
 
-    _pieceHasJumpMoves(playerId, pieceRow, pieceColumn){
-        if (this._pieceBelongsToPlayer(playerId, pieceRow, pieceColumn)) {
+    static _pieceHasJumpMoves(boardArray, playerId, pieceRow, pieceColumn){
+        if (BoardRules._pieceBelongsToPlayer(boardArray, playerId, pieceRow, pieceColumn)) {
             return (
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow + 2, pieceColumn + 2) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow + 2, pieceColumn - 2) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow - 2, pieceColumn + 2) ||
-                this._canMove(playerId, pieceRow, pieceColumn, pieceRow - 2, pieceColumn - 2)
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow + 2, pieceColumn + 2) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow + 2, pieceColumn - 2) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow - 2, pieceColumn + 2) ||
+                BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, pieceRow - 2, pieceColumn - 2)
             );
         }
         return false;
     }
 
-    applyMoveOnBoard(fromRow, fromColumn, toRow, toColumn){
-        this._boardArray[toRow][toColumn] = this._boardArray[fromRow][fromColumn];
-        this._boardArray[fromRow][fromColumn] = 0;
-        const playerPiece = this.getPiece(toRow, toColumn);
-        if ((toColumn === 0 || toColumn === ROWS_COLUMNS_NUM-1) &&
-            playerPiece.pieceType === piecesTypes.SIMPLE_PIECE){
-            playerPiece.changePieceTypeToQueen();
+    static getPieceType(boardArray, row, column){
+        if (Math.abs(boardArray[row][column]) === piecesTypes.SIMPLE_PIECE){
+            return piecesTypes.SIMPLE_PIECE;
         }
-        if (Math.abs(fromRow - toRow) === 2 && Math.abs(fromColumn - toColumn) === 2){
-            // Jump move
-            const opponentPieceRow = (fromRow + toRow) / 2;
-            const opponentPieceColumn = (fromColumn + toColumn) / 2;
-            const opponentPiece = this.getPiece(opponentPieceRow, opponentPieceColumn);
-            this._deletePiece(opponentPiece);
-            this._boardArray[opponentPieceRow][opponentPieceColumn] = 0;
-        }
-    }
-
-    _pieceBelongsToPlayer(playerId, cellRow, cellColumn){
-        return ((this._boardArray[cellRow][cellColumn] * playerId) > 0);
-    }
-
-    canSelectPiece(playerId, cellRow, cellColumn){
-        return this._pieceBelongsToPlayer(playerId, cellRow, cellColumn);
-    }
-
-    getPiece(cellRow, cellColumn){
-        if (this._hasPiece(cellRow, cellColumn)){
-            for (const [pieceId, piece] of this._piecesMap){
-                const boardX = piece.boardX;
-                const boardY = piece.boardY;
-                const boardRow = Math.floor(boardX / CELL_EDGE_SIZE);
-                const boardColumn = Math.floor(boardY / CELL_EDGE_SIZE);
-                if (cellRow === boardRow && cellColumn === boardColumn){
-                    return piece;
-                }
-            }
+        else if (Math.abs(boardArray[row][column]) === piecesTypes.QUEEN_PIECE){
+            return piecesTypes.QUEEN_PIECE;
         }
         else{
             return null;
         }
     }
 
-    _hasPiece(cellRow, cellColumn){
-        return (this._boardArray[cellRow][cellColumn] !== 0);
+    static pieceIsQueen(boardArray, row, column){
+        return (Math.abs(boardArray[row][column]) === piecesTypes.QUEEN_PIECE);
     }
 
-    _deletePiece(pieceToDelete){
-        for (const [pieceId, piece] of this._piecesMap){
-            if (piece === pieceToDelete){
-                this._piecesMap.delete(pieceId);
-                return true;
-            }
+    static pieceShouldBeConvertedToQueen(boardArray, row, column){
+        return (column === 0 || column === ROWS_COLUMNS_NUM - 1 &&
+            (Math.abs(boardArray[row][column]) === piecesTypes.SIMPLE_PIECE));
+    }
+
+    static isJumpMove(fromRow, fromColumn, toRow, toColumn){
+        return (Math.abs(fromRow - toRow) === 2 && Math.abs(fromColumn - toColumn) === 2);
+    }
+
+    static getJumpedOverRowColumn(fromRowColumn, toRowColumn){
+        return (fromRowColumn + toRowColumn) / 2
+    }
+
+    static applyContinuousMoveOnBoard(boardArray, move){
+        while (move != null){
+            BoardRules.applyMoveOnBoard(boardArray, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
+            move = move.nextMove;
         }
-        return false;
     }
 
-    isGameEnded(currentPlayerId){
-        const opponentPlayerId = this._getOpponentId(currentPlayerId);
-        return !(this._playerHasMoves(opponentPlayerId));
+    static applyMoveOnBoard(boardArray, fromRow, fromColumn, toRow, toColumn){
+        boardArray[toRow][toColumn] = boardArray[fromRow][fromColumn];
+        boardArray[fromRow][fromColumn] = 0;
+        if (BoardRules.pieceShouldBeConvertedToQueen(boardArray, toRow, toColumn)){
+            boardArray[toRow][toColumn] *= 2;
+        }
+        if (BoardRules.isJumpMove(fromRow, fromColumn, toRow, toColumn)){
+            const opponentPieceRow = BoardRules.getJumpedOverRowColumn(fromRow, toRow);
+            const opponentPieceColumn = BoardRules.getJumpedOverRowColumn(fromColumn, toColumn);
+            boardArray[opponentPieceRow][opponentPieceColumn] = 0;
+        }
     }
 
-    _getOpponentId(playerId){
+    static _pieceBelongsToPlayer(boardArray, playerId, cellRow, cellColumn){
+        return ((boardArray[cellRow][cellColumn] * playerId) > 0);
+    }
+
+    static canSelectPiece(boardArray, playerId, cellRow, cellColumn){
+        return BoardRules._pieceBelongsToPlayer(boardArray, playerId, cellRow, cellColumn);
+    }
+
+    static isGameEnded(boardArray, currentPlayerId){
+        const opponentPlayerId = BoardRules.getOpponentId(currentPlayerId);
+        return !(BoardRules._playerHasMoves(boardArray, opponentPlayerId));
+    }
+
+    static getOpponentId(playerId){
         return (playerId * -1);
     }
+
+    static calcPlayerScore(boardArray, playerId){
+        let score = 0;
+        for (let i=0; i<ROWS_COLUMNS_NUM; i++){
+            for (let j=0; j<ROWS_COLUMNS_NUM; j++){
+                const fixedPieceScore = Math.abs(boardArray[i][j]);
+                if ((boardArray[i][j] * playerId) > 0){
+                    score += fixedPieceScore;
+                }
+                else if ((boardArray[i][j] * playerId) < 0){
+                    score -= fixedPieceScore;
+                }
+            }
+        }
+        return score;
+    }
+
+    static getMoveOffset(moveOption, moveType){
+        const unfixedMoveOffset = (moveType === moveTypes.SIMPLE_MOVE) ? 1 : 2;
+        switch (moveOption){
+            case moveOptions.UP:
+                return unfixedMoveOffset;
+            case moveOptions.DOWN:
+                return -unfixedMoveOffset;
+            default:
+                return 0;
+        }
+    }
+
+    static createCopyOfBoardArray(boardArray){
+        const copyArray = [];
+        for (let i=0; i<boardArray.length; i++){
+            copyArray[i] = boardArray[i].slice();
+        }
+        return copyArray;
+    }
+
+    static addAllNestedMoves(boardArray, playerId, move, allPossibleMoves){
+        const copiedArray = BoardRules.createCopyOfBoardArray(boardArray);
+        BoardRules.applyMoveOnBoard(copiedArray, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
+        const allPossibleNextMoves = BoardRules.getAllPossibleMovesForPieceByMoveType(copiedArray, playerId, move.toRow,
+            move.toColumn, moveTypes.JUMP_MOVE);
+        if (allPossibleNextMoves.length === 0){
+            allPossibleMoves.push(move.getRootParent());
+        }
+        else {
+            for (let i = 0; i < allPossibleNextMoves.length; i++) {
+                const copiedMove = move.getCopy();
+                const nextMove = allPossibleNextMoves[i];
+                copiedMove.nextMove = nextMove;
+                nextMove.parent = copiedMove;
+                BoardRules.addAllNestedMoves(copiedArray, playerId, nextMove, allPossibleMoves);
+            }
+        }
+    }
+
+    static getAllPossibleMovesForPieceByMoveType(boardArray, playerId, pieceRow, pieceColumn, moveType){
+        const allPossibleMoves = [];
+        for (let i=1; i<=2; i++){
+            const toRow = pieceRow + BoardRules.getMoveOffset(i, moveType);
+            for (let j=1; j<=2; j++){
+                const toColumn = pieceColumn + BoardRules.getMoveOffset(j, moveType);
+                if (BoardRules.canMove(boardArray, playerId, pieceRow, pieceColumn, toRow, toColumn)){
+                    const move = new Move(pieceRow, pieceColumn, toRow, toColumn, moveType);
+                    if (moveType === moveTypes.SIMPLE_MOVE){
+                        allPossibleMoves.push(move);
+                    }
+                    else if (moveType === moveTypes.JUMP_MOVE){
+                        BoardRules.addAllNestedMoves(boardArray, playerId, move, allPossibleMoves)
+                    }
+                }
+            }
+        }
+        return allPossibleMoves;
+    }
+
+    static getAllPossibleMovesForPiece(boardArray, playerId, pieceRow, pieceColumn){
+        const allPossibleJumpMoves = BoardRules.getAllPossibleMovesForPieceByMoveType(boardArray, playerId, pieceRow,
+            pieceColumn, moveTypes.JUMP_MOVE);
+        if (allPossibleJumpMoves.length === 0){
+            return BoardRules.getAllPossibleMovesForPieceByMoveType(boardArray, playerId, pieceRow, pieceColumn,
+                moveTypes.SIMPLE_MOVE);
+        }
+        return allPossibleJumpMoves;
+    }
+
+    static getFilteredMoves(allPossibleMoves){
+        // In case there are jump move, the player must perform a jump and there is need to remove the simple moves
+        const onlyJumpMoves = [];
+        for (let i=0; i<allPossibleMoves.length; i++){
+            if (allPossibleMoves[i].moveType === moveTypes.JUMP_MOVE){
+                onlyJumpMoves.push(allPossibleMoves[i]);
+            }
+        }
+        if (onlyJumpMoves.length > 0){
+            return onlyJumpMoves;
+        }
+        else{
+            return allPossibleMoves;
+        }
+    }
+
+    static shuffleArray(arr){
+        let i, j, x;
+        for (i = arr.length; i; i--) {
+            j = Math.floor(Math.random() * i);
+            x = arr[i - 1];
+            arr[i - 1] = arr[j];
+            arr[j] = x;
+        }
+    }
+
+    static getAllPossibleMoves(boardArray, playerId){
+        let allPossibleMoves = [];
+        for (let i=0; i<ROWS_COLUMNS_NUM; i++){
+            for (let j=0; j<ROWS_COLUMNS_NUM; j++){
+                if (BoardRules._pieceBelongsToPlayer(boardArray, playerId, i, j)){
+                    const pieceMoves = BoardRules.getAllPossibleMovesForPiece(boardArray, playerId, i, j);
+                    allPossibleMoves = allPossibleMoves.concat(pieceMoves);
+                }
+            }
+        }
+        const filteredMoves = BoardRules.getFilteredMoves(allPossibleMoves);
+        BoardRules.shuffleArray(filteredMoves);
+        return filteredMoves;
+    }
+
 }
