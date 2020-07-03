@@ -2,7 +2,7 @@ const ROWS_COLUMNS_NUM = 8;
 const CELL_EDGE_SIZE = 100;
 const PIECE_RADIUS = 40;
 
-const MOVE_EFFECT_TOTAL_TIME = 300;
+const MOVE_EFFECT_TOTAL_TIME = 400;
 const MOVE_EFFECT_ITERATIONS = 10;
 
 const playerTypes = {
@@ -13,7 +13,7 @@ const playerTypes = {
 class Board {
 
 	constructor(player1Color, player2Type, player2Color, startingColor, computerLevel, sounds,
-				highlightMoves){
+				highlightJumps){
 		this._boardArray = null;
 		this._player1 = null;
 		this._player2 = null;
@@ -21,7 +21,7 @@ class Board {
 		this._piecesManager = new PiecesManager();
 		this._drawer = null;
 		this._sounds = sounds;
-		this._highlightMoves = highlightMoves;
+		this._highlightJumps = highlightJumps;
 		this._init(player1Color, player2Type, player2Color, startingColor, computerLevel);
 	}
 
@@ -50,15 +50,14 @@ class Board {
 
 	_initPlayers(player1Color, player2Type, player2Color, startingColor, computerLevel, boardElement){
 		const postMoveFunc = this._getPostMoveFunc();
-		this._player1 = new HumanPlayer(this._boardArray, playerIds.PLAYER_1, player1Color, postMoveFunc,
-			this._piecesManager, boardElement, this._drawer);
+		this._player1 = new HumanPlayer(this._boardArray, playerIds.PLAYER_1, postMoveFunc,
+			this._piecesManager, boardElement, this._drawer, this._highlightJumps, this._sounds);
 		if (player2Type === playerTypes.HUMAN) {
-			this._player2 = new HumanPlayer(this._boardArray, playerIds.PLAYER_2, player2Color, postMoveFunc,
-				this._piecesManager, boardElement, this._drawer);
+			this._player2 = new HumanPlayer(this._boardArray, playerIds.PLAYER_2, postMoveFunc,
+				this._piecesManager, boardElement, this._drawer, this._highlightJumps, this._sounds);
 		}
 		else{
-			this._player2 = new ComputerPlayer(this._boardArray, playerIds.PLAYER_2, player2Color, postMoveFunc,
-				computerLevel);
+			this._player2 = new ComputerPlayer(this._boardArray, playerIds.PLAYER_2, postMoveFunc, computerLevel);
 		}
 		if (player1Color === startingColor){
 			this._currentPlayer = this._player1;
@@ -81,6 +80,17 @@ class Board {
 
 	play(){
 		this._drawGame();
+		const currentPlayerType = this._getCurrentPlayerType();
+		if (currentPlayerType === playerTypes.HUMAN){
+			const opponentPieces = BoardRules.getAllOpponentPiecesForJump(this._boardArray,
+				this._currentPlayer.playerId);
+			this._currentPlayer.opponentJumpedOverPieces = opponentPieces;
+			if (this._highlightJumps){
+				opponentPieces.forEach((opponentPiece) => {
+					this._drawer.drawCursor(opponentPiece[0], opponentPiece[1], cursorColors.JUMPED_OVER);
+				})
+			}
+		}
 		this._currentPlayer.play();
 	}
 
@@ -90,6 +100,9 @@ class Board {
 			const moveEffectSingleIterationTime = MOVE_EFFECT_TOTAL_TIME / MOVE_EFFECT_ITERATIONS;
 			const xDelta = ((toRow - fromRow) * CELL_EDGE_SIZE) / MOVE_EFFECT_ITERATIONS;
 			const yDelta = ((toColumn - fromColumn) * CELL_EDGE_SIZE) / MOVE_EFFECT_ITERATIONS;
+			if (this._sounds){
+				SoundsManager.playSound(soundOptions.PIECE_MOVE);
+			}
 			for (let i = 0; i < MOVE_EFFECT_ITERATIONS; i++) {
 				setTimeout(() => {
 					piece.boardX += xDelta;
@@ -107,7 +120,8 @@ class Board {
 		BoardRules.applyMoveOnBoard(this._boardArray, fromRow, fromColumn, toRow, toColumn);
 		this._updatePieces(fromRow, fromColumn, toRow, toColumn);
 		if (BoardRules.isGameEnded(this._boardArray, playerId)){
-			setTimeout(() => alert("Game Ended!"), 500);
+			this._drawGame();
+			setTimeout(() => alert("Game Ended!"), 100);
 		}
 		else {
 			let inContinuousMoveMode = true;
@@ -116,7 +130,7 @@ class Board {
 				inContinuousMoveMode = false;
 			}
 			this._currentPlayer.inContinuousMoveMode = inContinuousMoveMode;
-			this.play(inContinuousMoveMode);
+			this.play();
 		}
 	}
 
@@ -147,6 +161,15 @@ class Board {
 			const piece = pieces[i];
 			this._drawer.drawPiece(piece.playerColor, piece.boardX, piece.boardY,
 				piece.pieceType === piecesTypes.QUEEN_PIECE);
+		}
+	}
+
+	_getCurrentPlayerType(){
+		if (this._currentPlayer instanceof HumanPlayer){
+			return playerTypes.HUMAN;
+		}
+		else{
+			return playerTypes.COMPUTER;
 		}
 	}
 

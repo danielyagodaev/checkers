@@ -144,7 +144,23 @@ class BoardRules {
     }
 
     static canSelectPiece(boardArray, playerId, cellRow, cellColumn){
-        return BoardRules._pieceBelongsToPlayer(boardArray, playerId, cellRow, cellColumn);
+        if (!(BoardRules._pieceBelongsToPlayer(boardArray, playerId, cellRow, cellColumn))){
+            return false;
+        }
+        const allPossibleMoves = BoardRules.getAllPossibleMoves(boardArray, playerId);
+        if (allPossibleMoves.length > 0){
+            if (allPossibleMoves[0].moveType === moveTypes.SIMPLE_MOVE){
+                return true;
+            }
+            else{
+                for (let i=0; i<allPossibleMoves.length; i++){
+                    if (allPossibleMoves[i].fromRow === cellRow && allPossibleMoves[i].fromColumn === cellColumn){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     static isGameEnded(boardArray, currentPlayerId){
@@ -280,6 +296,20 @@ class BoardRules {
         const filteredMoves = BoardRules.getFilteredMoves(allPossibleMoves);
         BoardRules.shuffleArray(filteredMoves);
         return filteredMoves;
+    }
+
+    static getAllOpponentPiecesForJump(boardArray, playerId){
+        const res = [];
+        const allPossibleMoves = BoardRules.getAllPossibleMoves(boardArray, playerId);
+        if (allPossibleMoves.length > 0 && allPossibleMoves[0].moveType === moveTypes.JUMP_MOVE){
+            allPossibleMoves.forEach((possibleMove) => {
+                const opponentPieceRow = BoardRules.getJumpedOverRowColumn(possibleMove.fromRow, possibleMove.toRow);
+                const opponentPieceColumn = BoardRules.getJumpedOverRowColumn(possibleMove.fromColumn,
+                    possibleMove.toColumn);
+                res.push([opponentPieceRow, opponentPieceColumn]);
+            });
+        }
+        return res;
     }
 
 }

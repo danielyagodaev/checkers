@@ -1,42 +1,33 @@
 const MOUSE_DOWN_EVENT = "mousedown";
 const MOUSE_MOVE_EVENT = "mousemove";
 
-const playerIds = {
-	PLAYER_1: 1,
-	PLAYER_2: -1
-};
-
 const cursorColors = {
 	PLAYER_1: "yellow",
 	PLAYER_2: "blue",
-	SELECTED: "red"
+	SELECTED: "red",
+	JUMPED_OVER: "#00ff00"
 };
 
-class HumanPlayer {
+class HumanPlayer extends Player {
 
-	constructor(boardArray, playerId, playerColor, postMoveFunc, piecesManager, boardElement, drawer){
-		this._boardArray = boardArray;
-		this._playerId = playerId;
-		this._playerColor = playerColor;
-		this._postMoveFunc = postMoveFunc;
+	constructor(boardArray, playerId, postMoveFunc, piecesManager, boardElement, drawer, highlightJumps, sounds){
+		super(boardArray, playerId, postMoveFunc);
 		this._piecesManager = piecesManager;
 		this._cursorColor = (playerId === playerIds.PLAYER_1) ? cursorColors.PLAYER_1 : cursorColors.PLAYER_2;
 		this._boardElement = boardElement;
 		this._drawer = drawer;
+		this._highlightJumps = highlightJumps;
+		this._sounds = sounds;
 		this._cursorRow = 0;
 		this._cursorColumn = 0;
 		this._selectedCursorRow = null;
 		this._selectedCursorColumn = null;
-		this._inContinuousMoveMode = false;
+		this._opponentJumpedOverPieces = null;
 		this._eventListener = (e) => {this._cursorMovementEventListener(e)};
 	}
 
-	get playerColor(){
-		return this._playerColor;
-	}
-
-	set inContinuousMoveMode(inContinuousMoveMode){
-		this._inContinuousMoveMode = inContinuousMoveMode;
+	set opponentJumpedOverPieces(opponentJumpedOverPieces){
+		this._opponentJumpedOverPieces = opponentJumpedOverPieces;
 	}
 
 	play(){
@@ -129,6 +120,14 @@ class HumanPlayer {
 	_cellIsAlreadyHighlighted(cellRow, cellColumn){
 		if (this._selectedCursorRow === cellRow && this._selectedCursorColumn === cellColumn){
 			return true;
+		}
+		if (this._highlightJumps) {
+			for (let i = 0; i < this._opponentJumpedOverPieces.length; i++) {
+				const currentOpponentPiece = this._opponentJumpedOverPieces[i];
+				if (currentOpponentPiece[0] === cellRow && currentOpponentPiece[1] === cellColumn) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}

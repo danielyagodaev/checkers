@@ -4,20 +4,12 @@ const computerLevels = {
     HARD: "hard"
 };
 
-class ComputerPlayer {
+class ComputerPlayer extends Player {
 
-    constructor(boardArray, playerId, playerColor, postMoveFunc, computerLevel) {
-        this._boardArray = boardArray;
-        this._playerId = playerId;
-        this._playerColor = playerColor;
-        this._postMoveFunc = postMoveFunc;
+    constructor(boardArray, playerId, postMoveFunc, computerLevel) {
+        super(boardArray, playerId, postMoveFunc);
         this._computerLevel = computerLevel;
         this._currentMove = null;
-        this._inContinuousMoveMode = false;
-    }
-
-    set inContinuousMoveMode(inContinuousMoveMode){
-        this._inContinuousMoveMode = inContinuousMoveMode;
     }
 
     play() {
@@ -44,7 +36,7 @@ class ComputerPlayer {
         }
     }
 
-    static getPlayerIdByDepth(playerId, depth){
+    static _getPlayerIdByDepth(playerId, depth){
         return (depth % 2 === 0) ? playerId : BoardRules.getOpponentId(playerId);
     }
 
@@ -61,7 +53,7 @@ class ComputerPlayer {
 
     static _buildScoreTreeHelper(boardArray, playerId, treeDepth, currentNode){
         if (currentNode.depth < treeDepth){
-            const currentPlayerId = ComputerPlayer.getPlayerIdByDepth(playerId, currentNode.depth);
+            const currentPlayerId = ComputerPlayer._getPlayerIdByDepth(playerId, currentNode.depth);
             const allPossibleMoves = BoardRules.getAllPossibleMoves(boardArray, currentPlayerId);
             allPossibleMoves.forEach((possibleMove)=>{
                const copiedArray = BoardRules.createCopyOfBoardArray(boardArray);

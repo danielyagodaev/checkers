@@ -5,8 +5,8 @@ window.onload = function() {
 	const startingColor = getParameterByName("starting_color");
 	const player2Type = getParameterByName("player_2_type");
 	const computerLevel = getParameterByName("computer_level");
-	const sounds = getParameterByName("sounds");
-	const highlight_jumps = getParameterByName("highlight_jumps");
+	const sounds = getParameterByName("sounds") === "on";
+	const highlight_jumps = getParameterByName("highlight_jumps") === "yes";
 
 	const player2Color = (player1Color === playersColors.RED) ? playersColors.WHITE : playersColors.RED;
 	showPlayersDetails(player1Name, player1Color, player2Name, player2Color);
