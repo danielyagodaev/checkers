@@ -26,6 +26,7 @@ class Board {
 	}
 
 	_init(player1Color, player2Type, player2Color, startingColor, computerLevel){
+		this._toggleAlertBox();
 		this._initBoardArray();
 		this._initPieces(player1Color, player2Color, CELL_EDGE_SIZE);
 		const boardElement = document.getElementById("board");
@@ -121,7 +122,7 @@ class Board {
 		this._updatePieces(fromRow, fromColumn, toRow, toColumn);
 		if (BoardRules.isGameEnded(this._boardArray, playerId)){
 			this._drawGame();
-			setTimeout(() => alert("Game Ended!"), 100);
+			this._gameEndedMessage(playerId);
 		}
 		else {
 			let inContinuousMoveMode = true;
@@ -170,6 +171,36 @@ class Board {
 		}
 		else{
 			return playerTypes.COMPUTER;
+		}
+	}
+
+	_toggleAlertBox(){
+		let alertBoxElement = document.getElementById("alert_box");
+		if (alertBoxElement.style.display === "none"){
+			alertBoxElement.style.display = "block";
+		}
+		else {
+			alertBoxElement.style.display = "none";
+		}
+	}
+
+	_gameEndedMessage(winningPlayerId){
+		let fixedWinningPlayerId, playerSound;
+		if (winningPlayerId === playerIds.PLAYER_1){
+			fixedWinningPlayerId = "1";
+			playerSound = soundOptions.WINNER;
+		}
+		else{
+			fixedWinningPlayerId = "2";
+			playerSound = soundOptions.LOOSER;
+		}
+		const winningPlayerElementName = "player_" + fixedWinningPlayerId + "_name_label";
+		const winningPlayerElement = document.getElementById(winningPlayerElementName);
+		let msgElement = document.getElementById("game_over_message");
+		msgElement.innerText = winningPlayerElement.innerText + " is the winner!"
+		this._toggleAlertBox();
+		if (this._sounds){
+			SoundsManager.playSound(playerSound);
 		}
 	}
 

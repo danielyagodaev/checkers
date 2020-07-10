@@ -117,3 +117,14 @@ h5 {
 	border: 2px solid;
 	border-radius: 15px;
 }
+
+#alert_box{
+	background-color: #ffffff;
+	position: absolute;
+	left: 45%;
+	text-align: center;
+	width: 10%;
+	border: 0.2rem solid #f96332;
+	border-radius: 2rem;
+	color: #f96332;
+}

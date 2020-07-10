@@ -93,6 +93,9 @@ class HumanPlayer extends Player {
 				this._selectedCursorRow = cellRow;
 				this._selectedCursorColumn = cellColumn;
 			}
+			else{
+				this._soundAnError();
+			}
 			this._setEventListeners();
 		}
 		else{
@@ -112,6 +115,7 @@ class HumanPlayer extends Player {
 				this._postMoveFunc(this._playerId, fromRow, fromColumn, cellRow, cellColumn);
 			}
 			else{
+				this._soundAnError();
 				this._setEventListeners();
 			}
 		}
@@ -134,6 +138,12 @@ class HumanPlayer extends Player {
 
 	static _transformCoordinateIntoCellNumber(toConvert){
 	    return (Math.floor(toConvert / CELL_EDGE_SIZE));
+	}
+
+	_soundAnError(){
+		if (this._sounds){
+			SoundsManager.playSound(soundOptions.ERROR_MOVE);
+		}
 	}
 
 }
