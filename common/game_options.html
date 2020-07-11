@@ -16,7 +16,7 @@
 				radio.disabled = true;
 			});
 		}
-		function player2IsCoumputer(){
+		function player2IsComputer(){
 			const radios = document.getElementsByName("computer_level");
 			radios.forEach((radio)=>{
 				radio.disabled = false;
@@ -78,7 +78,7 @@
 						<input type="text" name="player_2_name" id="player_2_name" placeholder="Player 2" value="Player 2" class="form-control my-form-control">
 						<div class="radio-container">
 							<h5>Type</h5>
-							<input type="radio" id="player_2_computer" name="player_2_type" value="computer" checked="true" onclick="player2IsCoumputer()">
+							<input type="radio" id="player_2_computer" name="player_2_type" value="computer" checked="true" onclick="player2IsComputer()">
 					        <label for="player_2_computer" class="radio-label">Computer</label>
 					        <input type="radio" id="player_2_human" name="player_2_type" value="human" onclick="player2IsHuman()">
 					        <label for="player_2_human" class="radio-label">Human</label>

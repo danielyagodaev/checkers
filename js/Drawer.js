@@ -41,7 +41,7 @@ class Drawer {
 			secondColor = squareWithPieceSecondColor;
 		}
 		let currentColor, colorStopSum = 0;
-		const colorStops = 10;
+		const colorStops = 20;
 		for (let k=0; k<colorStops; k++){
 			currentColor = ((k % 2) === 0) ? firstColor : secondColor;
 			gradient.addColorStop(colorStopSum, currentColor);
