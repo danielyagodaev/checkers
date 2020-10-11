@@ -194,10 +194,8 @@ class Board {
 			fixedWinningPlayerId = "2";
 			playerSound = soundOptions.LOOSER;
 		}
-		const winningPlayerElementName = "player_" + fixedWinningPlayerId + "_name_label";
-		const winningPlayerElement = document.getElementById(winningPlayerElementName);
 		let msgElement = document.getElementById("game_over_message");
-		msgElement.innerText = winningPlayerElement.innerText + " is the winner!"
+		msgElement.innerText = "Player " + fixedWinningPlayerId + " is the winner!"
 		this._toggleAlertBox();
 		if (this._sounds){
 			SoundsManager.playSound(playerSound);

@@ -9,7 +9,7 @@ window.onload = function() {
 	const highlight_jumps = getParameterByName("highlight_jumps") === "yes";
 
 	const player2Color = (player1Color === playersColors.RED) ? playersColors.WHITE : playersColors.RED;
-	showPlayersDetails(player1Name, player1Color, player2Name, player2Color);
+	//showPlayersDetails(player1Name, player1Color, player2Name, player2Color);
 
 	const board = new Board(player1Color, player2Type, player2Color, startingColor,
 		computerLevel, sounds, highlight_jumps);

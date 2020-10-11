@@ -3,7 +3,8 @@ h1 {
 	color: #FFFFFF;
 	text-align: center;
 	font-size: 10rem;
-	margin-bottom: 10rem;
+	margin-bottom: 3rem;
+	height: 11rem;
 }
 
 .container {
@@ -19,12 +20,14 @@ h1 {
 .my-btn {
 	font-size: 3rem;
 	width: 30rem;
-	margin: 2rem;
+	margin: 0 2rem;
 }
 
 .my-btn-lg {
+	margin-top: 3rem;
 	font-size: 5rem;
 	width: 40rem;
+	height: 8rem;
 }
 
 .btn-container {
@@ -34,8 +37,8 @@ h1 {
 
 .card {
 	margin: 2rem;
-	height: 30rem;
-	font-size: 1.5rem;
+	height: 20rem;
+	font-size: 1rem;
 	width: 30rem;
 }
 
@@ -43,7 +46,7 @@ h1 {
 	background-color: #f96332;
 	color: #FFFFFF;
 	margin-top: 0;
-	font-size: 3rem;
+	font-size: 2rem;
 }
 
 .card-body {
@@ -53,13 +56,13 @@ h1 {
 }
 
 .my-form-control {
-	width: 20rem;
-	height: 3rem;
+	width: 15rem;
+	height: 1.5rem;
 	margin-bottom: 1rem;
 }
 
 .radio-label {
-	width: 8rem;
+	width: 6rem;
 }
 
 input[type=radio] {
@@ -70,7 +73,7 @@ input[type=radio] + label {
 	display:inline-block;
 	cursor: pointer;
 	border: 0.1rem solid;
-	margin: -0.2rem;
+	margin: -0.1rem;
 	background-color: #f96332;
 	color: #ffffff;
 }
@@ -87,13 +90,13 @@ h5 {
 .radios-container {
 	justify-content: center;
 	align-items: center;
-	font-size: 1.5rem;
+	font-size: 1rem;
 	text-align: center;
 
 }
 
 .radio-container {
-	margin-bottom: 2rem;
+	margin-bottom: 1rem;
 	margin-left: 2rem;
 	margin-right: 2rem;
 }
@@ -121,10 +124,14 @@ h5 {
 #alert_box{
 	background-color: #ffffff;
 	position: absolute;
-	left: 45%;
+	left: 40%;
 	text-align: center;
-	width: 10%;
+	width: 20%;
 	border: 0.2rem solid #f96332;
 	border-radius: 2rem;
 	color: #f96332;
+}
+
+#board_big_container{
+	margin-bottom: 2rem;
 }
